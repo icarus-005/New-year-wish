@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #fff0f5 0%, #fff5e6 100%);
+            --text-main: #5d4037;
+            --text-accent: #d66d75;
+            --btn-color: #ff8fa3;
+            --env-color: #ffb7b2;
+            --paper-bg: #fffdf9;
+            --creamy-beige: #fdf5e6; 
+            --ornate-gold: #c5a387;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-gradient);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .butterfly-bg {
+            position: absolute;
+            width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/pinstripe.png');
+            opacity: 0.15; pointer-events: none; z-index: 0;
+        }
+
+        /* --- INTRO NOTE --- */
+        .intro-note {
+            background: white; 
+            padding: 60px 40px; 
+            border-radius: 30px; 
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08); 
+            width: 700px; 
+            max-width: 90%; 
+            z-index: 10; 
+            border: 2px solid #fce4ec;
+            transition: width 0.3s ease;
+        }
+        .intro-note h1 { 
+            font-family: 'Pacifico', cursive; 
+            color: var(--text-accent); 
+            margin-bottom: 20px; 
+            font-size: 2.5rem;
+        }
+        .intro-note p { font-size: 1.2rem; color: var(--text-main); margin-bottom: 25px; }
+
+        /* --- ENVELOPE & LETTER --- */
+        .envelope-container {
+            position: relative; display: none; 
+            width: 450px; height: 600px; 
+            perspective: 1200px; z-index: 5;
+            max-width: 95vw; 
+            transition: transform 0.5s;
+        }
+
+        .side-cover {
+            position: absolute; top: 0; width: 50%; height: 100%; background: var(--env-color);
+            z-index: 30; transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .left-cover { left: 0; border-radius: 15px 0 0 15px; transform-origin: left; border-right: 1px solid rgba(255,255,255,0.3); }
+        .right-cover { right: 0; border-radius: 0 15px 15px 0; transform-origin: right; }
+        
+        .heart-seal {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            font-size: 60px; z-index: 40; cursor: pointer; transition: 0.5s;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2));
+        }
+        .heart-seal:hover { transform: translate(-50%, -50%) scale(1.1); }
+        
+        .open .left-cover { transform: rotateY(-125deg); }
+        .open .right-cover { transform: rotateY(125deg); }
+        .open .heart-seal { opacity: 0; pointer-events: none; }
+
+        .letter-card {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--paper-bg);
+            /* Reduced vertical padding to give more space for text */
+            padding: 30px 40px; 
+            border-radius: 15px; z-index: 10; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            text-align: center; 
+            border: 1px solid rgba(197, 163, 135, 0.3);
+            /* Ensure it stays strictly inside */
+            overflow: hidden; 
+        }
+
+        .ornate-corner {
+            position: absolute; width: 40px; height: 40px; border: 2px solid var(--ornate-gold);
+            pointer-events: none; z-index: 11;
+        }
+        .top-left { top: 15px; left: 15px; border-right: none; border-bottom: none; }
+        .top-right { top: 15px; right: 15px; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: 15px; left: 15px; border-right: none; border-top: none; }
+        .bottom-right { bottom: 15px; right: 15px; border-left: none; border-top: none; }
+
+        .letter-header { 
+            font-family: "Monotype Corsiva", cursive; 
+            font-size: 2.5rem; 
+            color: var(--text-accent); 
+            margin-bottom: 10px; 
+            border-bottom: 1px double var(--ornate-gold); 
+            padding-bottom: 5px; 
+            width: 80%; 
+            flex-shrink: 0; /* Prevents header from shrinking */
+        }
+
+        /* --- THE FIX: SCROLLABLE TEXT AREA --- */
+        .letter-body { 
+            font-family: "Monotype Corsiva", cursive; 
+            font-size: 1.5rem; 
+            line-height: 1.5; 
+            color: var(--text-main); 
+            
+            /* Fill available space */
+            flex-grow: 1; 
+            width: 100%;
+            
+            /* Enable Scrolling */
+            overflow-y: auto; 
+            padding: 10px;
+            
+            /* Custom Scrollbar Styling */
+            scrollbar-width: thin;
+            scrollbar-color: var(--btn-color) transparent;
+        }
+
+        /* Webkit scrollbar (Chrome/Safari) */
+        .letter-body::-webkit-scrollbar {
+            width: 8px;
+        }
+        .letter-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .letter-body::-webkit-scrollbar-thumb {
+            background-color: var(--btn-color);
+            border-radius: 20px;
+            border: 2px solid #fffdf9;
+        }
+
+        /* --- COLLAGE --- */
+        .collage-frame {
+            background: var(--paper-bg); padding: 15px; border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15); transform: scale(0.7); opacity: 0;
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            width: auto; max-width: 90%; 
+            position: relative; z-index: 15; border: 2px solid var(--ornate-gold);
+        }
+        .active .collage-frame { transform: scale(1); opacity: 1; }
+        .collage-image { max-width: 100%; max-height: 65vh; border-radius: 8px; display: block; }
+
+        /* --- WISHES SECTION --- */
+        .wishes-container { 
+            text-align: center; width: 95%; max-width: 1000px; z-index: 10; 
+        }
+
+        .creamy-board {
+            background-color: var(--creamy-beige);
+            background-image: url('https://www.transparenttextures.com/patterns/parchment.png');
+            padding: 40px 20px;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+            border: 1px solid rgba(197, 163, 135, 0.2);
+            margin-top: 20px;
+        }
+
+        .wishes-grid { 
+            display: flex; justify-content: center; gap: 20px; margin-top: 15px; flex-wrap: wrap; 
+        }
+        
+        .wish-card {
+            width: 200px; height: 260px; background: white; border-radius: 20px;
+            cursor: pointer; transition: 0.6s; transform-style: preserve-3d;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.05); position: relative;
+        }
+        .wish-card.flipped { transform: rotateY(180deg); }
+        
+        .wish-front, .wish-back {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border-radius: 20px; padding: 15px; border: 2px solid #fff0f5;
+        }
+        .wish-back { transform: rotateY(180deg); background: #fffdf9; text-align: center; font-size: 1.1rem; color: var(--text-main); padding: 20px; }
+        .wish-front img { width: 120px; height: 120px; object-fit: contain; }
+
+        .progress-indicator { margin-top: 25px; color: var(--text-accent); font-weight: bold; font-size: 1.2rem; }
+        
+        /* --- FINAL PAGE --- */
+        .final-msg-container {
+            text-align: center; max-width: 800px; width: 90%;
+        }
+        .blur-text {
+            filter: blur(8px);
+            transition: filter 1.5s ease;
+            font-size: 2rem;
+            line-height: 1.6;
+            margin: 40px 0;
+            color: var(--text-main);
+            font-family: "Monotype Corsiva", cursive;
+        }
+        .revealed { filter: blur(0); }
+
+        .bottom-controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+        .control-btn {
+            background: white; border: 2px solid var(--btn-color);
+            color: var(--text-accent); padding: 12px 25px;
+            border-radius: 30px; cursor: pointer; font-weight: bold;
+            font-size: 1rem;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .control-btn:hover { background: var(--btn-color); color: white; transform: translateY(-2px); }
+
+        /* Modal Style */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center;
+            backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background: white; padding: 40px; border-radius: 30px; text-align: center;
+            max-width: 90%; width: 450px; border: 3px solid var(--btn-color);
+            animation: popIn 0.4s ease;
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* --- ANIMATIONS --- */
+        .falling-element { position: absolute; top: -50px; pointer-events: none; z-index: 20; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        .btn { 
+            background: var(--btn-color); color: white; border: none; padding: 14px 40px; 
+            border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 15px; 
+            transition: 0.3s; z-index: 15; font-size: 1.1rem;
+            box-shadow: 0 5px 15px rgba(255, 143, 163, 0.4);
+            flex-shrink: 0; /* Prevents button from shrinking */
+        }
+        .btn:hover { transform: scale(1.05); background: #ff758c; }
+        #nextBtnLetter { display: none; }
+        .screen { display: none; width: 100%; justify-content: center; align-items: center; flex-direction: column; }
+        .active { display: flex; }
+
+        /* --- 📱 MOBILE RESPONSIVENESS (IMPROVED) --- */
+        @media (max-width: 768px) {
+            .btn { padding: 12px 30px; font-size: 1rem; }
+            .intro-note { width: 90%; padding: 30px 20px; }
+            .intro-note h1 { font-size: 2rem; }
+            
+            /* Adjusted Envelope Height for Mobile */
+            .envelope-container { height: 500px; width: 90vw; }
+            
+            .letter-header { font-size: 1.8rem; margin-bottom: 10px; }
+            .letter-body { font-size: 1.2rem; line-height: 1.3; }
+            .letter-card { padding: 20px; }
+            
+            .collage-image { max-height: 40vh; }
+            .wishes-grid { gap: 10px; }
+            .wish-card { width: 140px; height: 190px; } 
+            .wish-front img { width: 70px; height: 70px; }
+            .wish-back { font-size: 0.85rem; padding: 10px; }
+            
+            .blur-text { font-size: 1.4rem; margin: 20px 0; }
+            .bottom-controls { 
+                width: 100%; justify-content: center; 
+                right: 0; bottom: 20px; 
+                flex-direction: column; align-items: center; gap: 10px;
+            }
+            .control-btn { width: 80%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="butterfly-bg"></div>
+
+    <div id="section-note" class="screen active">
+        <div class="intro-note">
+            <img src="https://i.postimg.cc/8PgXtpzZ/Borboletas-Butterfly-Sticker-Borboletas-Butterfly-Butterflies-Descubrir-y-compartir-GIFs.gif" width="120" style="margin-bottom: 15px;">
+            <h1>Happy New Year 2026!</h1>
+            <p>I prepared a little something for you...</p>
+            <button class="btn" onclick="goToLetter()">Open My Gift ✨</button>
+        </div>
+    </div>
+
+    <div id="section-envelope" class="screen">
+        <div class="envelope-container" id="mainContainer">
+            <div class="side-cover left-cover"></div>
+            <div class="side-cover right-cover"></div>
+            <div class="heart-seal" id="heart" onclick="openSides()">❤️</div>
+            <div class="letter-card">
+                <div class="ornate-corner top-left"></div><div class="ornate-corner top-right"></div>
+                <div class="ornate-corner bottom-left"></div><div class="ornate-corner bottom-right"></div>
+                <span class="letter-header">My letter to you</span>
+                <div id="typewriter" class="letter-body"></div>
+                <button id="nextBtnLetter" class="btn" onclick="goToCollage()">Next ❤️</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="section-collage" class="screen">
+        <div class="collage-frame">
+            <div class="ornate-corner top-left"></div><div class="ornate-corner top-right"></div>
+            <div class="ornate-corner bottom-left"></div><div class="ornate-corner bottom-right"></div>
+            <img class="collage-image" src="https://i.postimg.cc/Gm2FjVGN/4.jpg" alt="Collage">
+        </div>
+        <button class="btn" onclick="goToWishes()">Next ❤️</button>
+    </div>
+
+    <div id="section-wishes" class="screen">
+        <div class="wishes-container">
+            <h1 style="font-family: 'Pacifico'; color: var(--text-accent); font-size: 2.2rem; margin-bottom: 15px;">Pick a surprise!</h1>
+            
+            <div class="creamy-board">
+                <div class="wishes-grid">
+                    <div class="wish-card" onclick="flipCard(this)">
+                        <div class="wish-front">
+                            <img src="https://i.postimg.cc/SN1CTVy1/download-(1).gif">
+                        </div>
+                        <div class="wish-back"><p>May your year be filled with new hopes, new joy, and new beginnings! ✨</p></div>
+                    </div>
+                    <div class="wish-card" onclick="flipCard(this)">
+                        <div class="wish-front">
+                             <img src="https://i.postimg.cc/kGQ9VTTK/Hello-Kitty-GIF.gif">
+                        </div>
+                        <div class="wish-back"><p>Wishing you health, wealth, and happiness in 2026! 🌸</p></div>
+                    </div>
+                    <div class="wish-card" onclick="flipCard(this)">
+                        <div class="wish-front">
+                             <img src="https://i.postimg.cc/jdhttkWF/download-(8).jpg">
+                        </div>
+                        <div class="wish-back"><p>May every day sparkle with positivity and love! 💖</p></div>
+                    </div>
+                </div>
+                <div class="progress-indicator" id="progressText">0 / 3 wishes discovered!</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="finalModal" class="modal">
+        <div class="modal-content">
+            <img src="https://i.postimg.cc/0jpjgLBw/My-slavic.jpg" width="160" style="border-radius: 15px; margin-bottom: 15px;">
+            <h2 style="color: var(--text-accent); margin: 15px 0;">All Wishes Unlocked! 🎊</h2>
+            <p>You have collected all my love notes.</p>
+            <button class="btn" onclick="goToFinalPage()">Reveal Final Wish ✨</button>
+        </div>
+    </div>
+
+    <div id="section-final" class="screen">
+        <div class="final-msg-container">
+            <h1 style="font-family: 'Pacifico'; color: var(--text-accent); margin-bottom: 20px; font-size: 2.5rem;">My Final Message</h1>
+            <div id="secretMessage" class="blur-text">
+                "Happy New Year! I'm so glad to have you in my life. <br>
+                Let's make 2026 our best year yet! <br>
+                I love you more than words can say. ❤️"
+            </div>
+        </div>
+
+        <div class="bottom-controls">
+            <button id="revealBtn" class="control-btn" onclick="revealMsg()">Reveal Final Message 👁️</button>
+            <button class="control-btn" onclick="location.reload()">Experience Again 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        const letterText = "If I could give you one gift this new year it would be the ability to see yourself through my eyes. Only then would you realize how truly special you are. You light up my life with your every word, smile and laugh. You are the best thing to ever happen to me and I love you more than words can express, forever and always.\n\nYours truly!";
+        let discoveredWishes = 0;
+
+        function goToLetter() {
+            document.getElementById('section-note').classList.remove('active');
+            document.getElementById('section-envelope').classList.add('active');
+            document.getElementById('mainContainer').style.display = 'block';
+        }
+
+        function openSides() {
+            const container = document.getElementById('mainContainer');
+            if (!container.classList.contains('open')) {
+                container.classList.add('open');
+                setTimeout(startTypewriter, 1000);
+            }
+        }
+
+        function startTypewriter() {
+            const element = document.getElementById('typewriter');
+            let i = 0;
+            element.innerHTML = ""; // Clear previous text if any
+            function type() {
+                if (i < letterText.length) {
+                    if (letterText.charAt(i) === "\n") {
+                        element.innerHTML += "<br>";
+                    } else {
+                        element.innerHTML += letterText.charAt(i);
+                    }
+                    // Auto-scroll to bottom as it types
+                    element.scrollTop = element.scrollHeight;
+                    i++;
+                    setTimeout(type, 40); 
+                } else { 
+                    document.getElementById('nextBtnLetter').style.display = "block"; 
+                }
+            }
+            type();
+        }
+
+        function goToCollage() {
+            document.getElementById('section-envelope').classList.remove('active');
+            document.getElementById('section-collage').classList.add('active');
+            startFallingEffects();
+        }
+
+        function goToWishes() {
+            document.getElementById('section-collage').classList.remove('active');
+            document.getElementById('section-wishes').classList.add('active');
+        }
+
+        function flipCard(card) {
+            if (!card.classList.contains('flipped')) {
+                card.classList.add('flipped');
+                discoveredWishes++;
+                document.getElementById('progressText').innerText = `${discoveredWishes} / 3 wishes discovered! ✨`;
+                if (discoveredWishes === 3) {
+                    setTimeout(() => { document.getElementById('finalModal').style.display = 'flex'; }, 800);
+                }
+            }
+        }
+
+        function goToFinalPage() {
+            document.getElementById('finalModal').style.display = 'none'; 
+            document.getElementById('section-wishes').classList.remove('active'); 
+            document.getElementById('section-final').classList.add('active'); 
+        }
+
+        function revealMsg() {
+            document.getElementById('secretMessage').classList.add('revealed');
+            startFallingEffects(); 
+            
+            // Swap button text and function
+            const btn = document.getElementById('revealBtn');
+            btn.innerText = "Send Virtual Hug 🫂";
+            btn.setAttribute("onclick", "sendVirtualHug()");
+            btn.style.backgroundColor = "var(--btn-color)";
+            btn.style.color = "white";
+        }
+
+        function sendVirtualHug() {
+            const hugSymbols = ['🫂', '🤗', '🧸', '💖', '🥰', '💕', '😻'];
+            
+            for(let i = 0; i < 150; i++) {
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'falling-element';
+                    el.innerHTML = hugSymbols[Math.floor(Math.random() * hugSymbols.length)];
+                    el.style.left = Math.random() * 95 + 'vw';
+                    el.style.top = -10 + 'vh'; 
+                    el.style.fontSize = (Math.random() * 30 + 20) + 'px'; 
+                    el.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                    document.body.appendChild(el);
+                    setTimeout(() => el.remove(), 3000);
+                }, i * 20); 
+            }
+        }
+
+        function startFallingEffects() {
+            const symbols = ['❤️', '✨', '💖', '💘', '🌸','💗','💝'];
+            let count = 0;
+            const interval = setInterval(() => {
+                const el = document.createElement('div');
+                el.className = 'falling-element';
+                el.innerHTML = symbols[Math.floor(Math.random() * symbols.length)];
+                el.style.left = Math.random() * 95 + 'vw';
+                el.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                el.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                el.style.opacity = Math.random();
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 5000);
+                
+                count++;
+                if(count > 50) clearInterval(interval); 
+            }, 200);
+        }
+    </script>
+</body>
+</html>
